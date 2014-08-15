@@ -4,23 +4,26 @@ require 'active_attr/dirty'
 require 'active_force/active_query'
 require 'active_force/association'
 require 'yaml'
+require 'forwardable'
 
 module ActiveForce
   class SObject
     include ActiveAttr::Model
     include ActiveAttr::Dirty
     include ActiveForce::Association
-
     STANDARD_TYPES = %w[ Account Contact Opportunity Campaign]
 
     class_attribute :mappings, :fields, :table_name
 
+
     class << self
-      delegate :where, :first, :last, :all, :find, :find_by, :count, :to => :query
+      extend Forwardable
+      def_delegators :query, :where, :first, :last, :all, :find, :find_by, :count
     end
 
     # The table name to used to make queries.
     # It is derived from the class name adding the "__c" when needed.
+
     def self.table_name
       @table_name ||= custom_table_name || "#{ self.name }__c"
     end
